@@ -29,7 +29,7 @@
 		# You will never call it by itself, to my knowledge.
 		*/
 		function initialize() {
-			$('#overlay, #lightbox').remove();
+			$('#jqlb-overlay, #lightbox').remove();
 			opts.inprogress = false;
 
 			// if jsonData, build the imageArray from data provided in JSON format
@@ -39,7 +39,7 @@
 				opts.imageArray = parser(opts.jsonData);
 			}
     
-			var outerImage = '<div id="outerImageContainer"><div id="imageContainer"><iframe id="lightboxIframe"></iframe><img id="lightboxImage" /><div id="hoverNav"><a href="javascript://" title="' + opts.strings.prevLinkTitle + '" id="prevLink"></a><a href="javascript://" id="nextLink" title="' + opts.strings.nextLinkTitle + '"></a></div><div id="loading"><a href="javascript://" id="loadingLink"><img src="'+opts.fileLoadingImage+'"></a></div></div></div>';
+			var outerImage = '<div id="outerImageContainer" class="jquery-lightbox-animate"><div id="imageContainer" class="jquery-lightbox-animate"><iframe id="lightboxIframe"></iframe><img id="lightboxImage" /><div id="hoverNav"><a href="javascript://" title="' + opts.strings.prevLinkTitle + '" id="prevLink"></a><a href="javascript://" id="nextLink" title="' + opts.strings.nextLinkTitle + '"></a></div><div id="loading"><a href="javascript://" id="loadingLink"><img src="'+opts.fileLoadingImage+'"></a></div></div></div>';
 			var imageData = '<div id="imageDataContainer" class="clearfix"><div id="imageData"><div id="imageDetails"><span id="caption"></span><span id="numberDisplay"></span></div><div id="bottomNav">';
 
 			if (opts.displayHelp) {
@@ -51,19 +51,19 @@
 			var string;
 
 			if (opts.navbarOnTop) {
-				string = '<div id="overlay"></div><div id="lightbox">' + imageData + outerImage + '</div>';
+				string = '<div id="jqlb-overlay"></div><div id="lightbox">' + imageData + outerImage + '</div>';
 				$("body").append(string);
 				$("#imageDataContainer").addClass('ontop');
 			} else {
-				string = '<div id="overlay"></div><div id="lightbox">' + outerImage + imageData + '</div>';
+				string = '<div id="jqlb-overlay"></div><div id="lightbox">' + outerImage + imageData + '</div>';
 				$("body").append(string);
 			}
 
 			if (opts.imageScroll === true) {
-        $('#lightbox').css('position', 'fixed')
-      }
+  			  $('#lightbox').css('position', 'fixed')
+		  	}
 
-			$("#overlay, #lightbox").click(function(){ end(); }).hide();
+			$("#jqlb-overlay, #lightbox").click(function(){ end(); }).hide();
 			$("#loadingLink, #bottomNavClose").click(function(){ end(); return false;});
 			$('#outerImageContainer').width(opts.widthCurrent).height(opts.heightCurrent);
 			$('#imageDataContainer').width(opts.widthCurrent);
@@ -77,7 +77,7 @@
 		};
 
 		/*
-		# Get the document and window width/heigh
+		# Get the document and window width/height
 		#
 		# Examples
 		#
@@ -131,7 +131,7 @@
 
 			// Resize and display the sexy, sexy overlay.
 			resizeOverlayToFitWindow();
-			$("#overlay").hide().css({ opacity : opts.overlayOpacity }).fadeIn();
+			$("#jqlb-overlay").hide().css({ opacity : opts.overlayOpacity }).fadeIn();
 			imageNum = 0;
 
 			// if data is not provided by jsonData parameter
@@ -207,8 +207,8 @@
 				var newHeight = imgPreloader.height;
 
 				if (opts.scaleImages) {
-					newWidth = parseInt(opts.xScale * newWidth);
-					newHeight = parseInt(opts.yScale * newHeight);
+					newWidth = (opts.xScale * newWidth)|0;
+					newHeight = (opts.yScale * newHeight)|0;
 				}
 
 				if (opts.fitToScreen) {
@@ -222,10 +222,10 @@
 
 					if ((imgPreloader.height > initialPageHeight) || (imgPreloader.width > initialPageWidth)) {
 						if (dI > dP) {
-							newWidth = parseInt((initialPageHeight/imgPreloader.height) * imgPreloader.width);
+							newWidth = ((initialPageHeight/imgPreloader.height) * imgPreloader.width)|0;
 							newHeight = initialPageHeight;
 						} else {
-							newHeight = parseInt((initialPageWidth/imgPreloader.width) * imgPreloader.height);
+							newHeight = ((initialPageWidth/imgPreloader.width) * imgPreloader.height)|0;
 							newWidth = initialPageWidth;
 						}
 					}
@@ -245,7 +245,7 @@
 			function end() {
 				disableKeyboardNav();
 				$('#lightbox').hide();
-				$('#overlay').fadeOut();
+				$('#jqlb-overlay').fadeOut();
 				$('select, object, embed').show();
 			};
 
@@ -282,12 +282,10 @@
 				wDiff = opts.widthCurrent - widthNew;
 				hDiff = opts.heightCurrent - heightNew;
 
-				$('#imageDataContainer').animate({width: widthNew},opts.resizeSpeed,'linear');
-				$('#outerImageContainer').animate({width: widthNew},opts.resizeSpeed,'linear', function() {
-					$('#outerImageContainer').animate({height: heightNew},opts.resizeSpeed,'linear', function() {
-						showImage();
-					});
-				});
+				$('#imageDataContainer').css({width: widthNew});
+				$('#outerImageContainer').css({width: widthNew});
+				$('#outerImageContainer').css({height: heightNew});
+				showImage();
 				
 				afterTimeout = function () {
     				$('#prevLink').height(imgHeight);
@@ -361,7 +359,7 @@
 			# This should now happen whenever a window is resized, so you should always see a full overlay
 			*/
 			function resizeOverlayToFitWindow(){
-				$('#overlay').css({width: $(document).width(), height: $(document).height()});
+				$('#jqlb-overlay').css({width: $(document).width(), height: $(document).height()});
 				//  ^^^^^^^ <- sexy!
 			};
 
@@ -467,6 +465,7 @@
 		$.fn.lightbox.defaults = {
 		  triggerEvent: "click",
 			allSet: false,
+			animateSizeChanges: true,
 			fileLoadingImage: 'images/loading.gif',
 			fileBottomNavCloseImage: 'images/closelabel.gif',
 			overlayOpacity: 0.6,
